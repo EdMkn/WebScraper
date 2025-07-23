@@ -18,26 +18,51 @@ namespace WebScraper.Services
             _parser = parser;
         }
 
-        public async Task ScrapeAsync(string url)
+        public async Task ScrapeAsync(string baseUrl, int pageCount)
         {
-            Console.WriteLine($"Scraping URL: {url}");
+            var allProducts = new List<Product>();
 
-            string html = await _httpClient.GetHtmlAsync(url);
-            Console.WriteLine("HTML fetched.");
-
-            var products = _parser.Parse(html).ToList();
-            Console.WriteLine($"Parsed {products.Count  } products.");
-
-            foreach (var product in products)
+            for (int i = 1; i <= pageCount; i++)
             {
-                Console.WriteLine(product);
+                string pageUrl = $"{baseUrl}/page-{i}.html";
+                Console.WriteLine($"Scraping page {i}: {pageUrl}");
+
+                string html;
+                try
+                {
+                    html = await _httpClient.GetHtmlAsync(pageUrl);
+
+                }
+                catch (HttpRequestException ex)
+                {
+                    Console.WriteLine($"⚠️  Erreur HTTP à la page {i}: {ex.Message}");
+                    continue; // passe à la suivante
+                }
+
+
+                var products = _parser.Parse(html).ToList();
+                if (products.Count == 0)
+                {
+                    Console.WriteLine("🚫 Aucune donnée sur cette page. Fin du scraping.");
+                    break;
+                }
+                Console.WriteLine($"Parsed {products.Count} products.");
+
+                allProducts.AddRange(products);
+                /*foreach (var product in products)
+                {
+                    Console.WriteLine(product);
+                }*/
+
+
             }
 
-            // Export JSON
-    var json = JsonSerializer.Serialize(products, new JsonSerializerOptions { WriteIndented = true });
-    await File.WriteAllTextAsync("products.json", json);
 
-    Console.WriteLine("✅ Export JSON -> products.json");
+            // Export JSON
+            var json = JsonSerializer.Serialize(allProducts, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync("products_all.json", json);
+
+            Console.WriteLine("✅ Export JSON -> products_all.json");
         }
     }
 
