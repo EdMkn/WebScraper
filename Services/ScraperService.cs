@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using System.IO;
 using WebScraper.Models;
 using WebScraper.Parsers;
+using WebScraper.Data;
 namespace WebScraper.Services
 {
 
@@ -11,11 +12,13 @@ namespace WebScraper.Services
     {
         private readonly IHttpClientService _httpClient;
         private readonly IHtmlParser<Product> _parser;
+        private readonly ScraperDbContext _db;
 
-        public ScraperService(IHttpClientService httpClient, IHtmlParser<Product> parser)
+        public ScraperService(IHttpClientService httpClient, IHtmlParser<Product> parser, ScraperDbContext db)
         {
             _httpClient = httpClient;
             _parser = parser;
+            _db = db;
         }
 
         public async Task ScrapeAsync(string baseUrl, int pageCount)
@@ -49,6 +52,8 @@ namespace WebScraper.Services
                 Console.WriteLine($"Parsed {products.Count} products.");
 
                 allProducts.AddRange(products);
+
+                await _db.SaveChangesAsync();
                 /*foreach (var product in products)
                 {
                     Console.WriteLine(product);

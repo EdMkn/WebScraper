@@ -3,6 +3,7 @@ using WebScraper;
 using WebScraper.Services;
 using WebScraper.Parsers;
 using WebScraper.Models;
+using WebScraper.Data;
 
 var services = new ServiceCollection();
 
@@ -10,6 +11,7 @@ var services = new ServiceCollection();
 services.AddHttpClient<IHttpClientService, HttpClientService>();
 services.AddSingleton<IHtmlParser<Product>, HtmlParser>();
 services.AddTransient<IScraperService, ScraperService>();
+services.AddDbContext<ScraperDbContext>();
 
 var serviceProvider = services.BuildServiceProvider();
 
