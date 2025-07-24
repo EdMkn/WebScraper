@@ -21,4 +21,4 @@ var serviceProvider = services.BuildServiceProvider();
 var scraper = serviceProvider.GetRequiredService<IScraperService>();
 
 string targetUrl = "https://books.toscrape.com/catalogue";
-await scraper.ScrapeAsync(targetUrl, 50);
+await scraper.ScrapeAsync(targetUrl, 10);
