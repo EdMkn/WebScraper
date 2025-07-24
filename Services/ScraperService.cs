@@ -4,22 +4,17 @@ using System.IO;
 using WebScraper.Models;
 using WebScraper.Parsers;
 using WebScraper.Data;
+using WebScraper.Interfaces;
 namespace WebScraper.Services
 {
 
 
-    public class ScraperService : IScraperService
+    public class ScraperService(IHttpClientService httpClient, IHtmlParser<Product> parser, ScraperDbContext db, ILoggerService logger) : IScraperService
     {
-        private readonly IHttpClientService _httpClient;
-        private readonly IHtmlParser<Product> _parser;
-        private readonly ScraperDbContext _db;
-
-        public ScraperService(IHttpClientService httpClient, IHtmlParser<Product> parser, ScraperDbContext db)
-        {
-            _httpClient = httpClient;
-            _parser = parser;
-            _db = db;
-        }
+        private readonly IHttpClientService _httpClient = httpClient;
+        private readonly IHtmlParser<Product> _parser = parser;
+        private readonly ScraperDbContext _db = db;
+        private readonly ILoggerService _logger = logger;
 
         public async Task ScrapeAsync(string baseUrl, int pageCount)
         {
@@ -28,7 +23,7 @@ namespace WebScraper.Services
             for (int i = 1; i <= pageCount; i++)
             {
                 string pageUrl = $"{baseUrl}/page-{i}.html";
-                Console.WriteLine($"Scraping page {i}: {pageUrl}");
+                _logger.Info($"Scrappant page {i}: {pageUrl}");
 
                 string html;
                 try
@@ -38,7 +33,7 @@ namespace WebScraper.Services
                 }
                 catch (HttpRequestException ex)
                 {
-                    Console.WriteLine($"⚠️  Erreur HTTP à la page {i}: {ex.Message}");
+                    _logger.Error($"⚠️  Erreur HTTP à la page {i}: {ex.Message}");
                     continue; // passe à la suivante
                 }
 
@@ -46,10 +41,10 @@ namespace WebScraper.Services
                 var products = _parser.Parse(html).ToList();
                 if (products.Count == 0)
                 {
-                    Console.WriteLine("🚫 Aucune donnée sur cette page. Fin du scraping.");
+                    _logger.Warn("🚫 Aucune donnée sur cette page. Fin du scraping.");
                     break;
                 }
-                Console.WriteLine($"Parsed {products.Count} products.");
+                Console.WriteLine($"{products.Count} produits parsés.");
 
                 allProducts.AddRange(products);
 
