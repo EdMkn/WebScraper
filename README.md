@@ -1,6 +1,6 @@
 # 📚 WebScraper - Scraping de produits multi-pages avec export et SQLite (C#)
 
-> Un projet en C# pour scrapper les données de produits depuis un site e-commerce (ex: books.toscrape.com), paginer les résultats, les sauvegarder dans une base de données SQLite, et les exporter en JSON/CSV.
+> Un projet en C# pour scrapper les données de produits depuis un site e-commerce (ex: books.toscrape.com), paginer les résultats, les sauvegarder dans une base de données SQLite, et les exporter en JSON.
 
 ---
 
